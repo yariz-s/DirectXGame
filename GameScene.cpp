@@ -6,7 +6,10 @@ using namespace KamataEngine;
 // デストラクタ
 GameScene::~GameScene() {
 	delete model_;
+	delete modelskydome_;
+	delete modelplayer_;
 	delete player_;
+	delete skydome_;
 	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockline : worldTransformBlocks_) {
 		for (KamataEngine::WorldTransform* worldTransformBlock : worldTransformBlockline) {
 			delete worldTransformBlock;
@@ -18,10 +21,10 @@ GameScene::~GameScene() {
 
 // 初期化処理
 void GameScene::Initialize() {
-	// ファイル名を指定してテクスチャを読み込む
-	textureHandle_ = TextureManager::Load("uvChecker.png");
 	// スプライトインスタンスの生成
-	model_ = Model::Create();
+	model_ = Model::CreateFromOBJ("block",true);
+	modelskydome_ = Model::CreateFromOBJ("skydome", true);
+	modelplayer_ = Model::CreateFromOBJ("player", true);
 
 	debugCamera_ = new DebugCamera(1280, 720);
 
@@ -54,7 +57,9 @@ void GameScene::Initialize() {
 	// 自キャラにの生成
 	player_ = new Player();
 	// 自キャラの初期化
-	player_->Initialize(model_, textureHandle_, &camera_);
+	player_->Initialize(modelplayer_, &camera_);
+	skydome_ = new Skydome();
+	skydome_->Initialize(modelskydome_, &camera_);
 }
 
 // 更新処理
@@ -106,6 +111,7 @@ void GameScene::Draw() {
 	}
 	// 自キャラの描画
 	player_->Draw();
+	skydome_->Draw();
 
 	// スプライト描画後処理
 	Model::PostDraw();
