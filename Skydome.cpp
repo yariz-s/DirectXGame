@@ -11,3 +11,4 @@ void Skydome::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camer
 void Skydome::Update() { worldTransform_.TransferMatrix(); }
 
 void Skydome::Draw() { model_->Draw(worldTransform_, *camera_); }
+

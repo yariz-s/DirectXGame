@@ -1,20 +1,22 @@
 #include "GameScene.h"
 #include "MyMath.h"
-
+#include "MapChipField.h"
 using namespace KamataEngine;
 
 // デストラクタ
 GameScene::~GameScene() {
-	delete model_;
-	delete modelskydome_;
-	delete modelplayer_;
+	delete mapChipField_;
+	delete modelBlock_;
+delete modelSkydome_;
+	delete modelPlayer_;
 	delete player_;
 	delete skydome_;
 	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockline : worldTransformBlocks_) {
-		for (KamataEngine::WorldTransform* worldTransformBlock : worldTransformBlockline) {
+		for (KamataEngine::WorldTransform* worldTransformBlock: worldTransformBlockline) {
 			delete worldTransformBlock;
 		}
 	}
+
 	worldTransformBlocks_.clear();
 	delete debugCamera_;
 }
@@ -22,45 +24,56 @@ GameScene::~GameScene() {
 // 初期化処理
 void GameScene::Initialize() {
 	// スプライトインスタンスの生成
-	model_ = Model::CreateFromOBJ("block",true);
-	modelskydome_ = Model::CreateFromOBJ("skydome", true);
-	modelplayer_ = Model::CreateFromOBJ("player", true);
+	modelBlock_ = Model::CreateFromOBJ("block",true);
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+	modelPlayer_ = Model::CreateFromOBJ("player", true);
 
 	debugCamera_ = new DebugCamera(1280, 720);
 
-	const uint32_t kNumBlockVirtical = 10;
-	const uint32_t kNumBlockHorizon = 20;
+	//const uint32_t kNumBlockVirtical = 10;
+	//const uint32_t kNumBlockHorizon = 20;
 
-	const float kBlockWidth = 2.0f;
-	const float kBlockheight = 2.0f;
+	//const float kBlockWidth = 2.0f;
+	//const float kBlockheight = 2.0f;
 
-	worldTransformBlocks_.resize(kNumBlockVirtical);
 
-	for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
 
-		worldTransformBlocks_[i].resize(kNumBlockHorizon);
-	}
-	for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
-		for (uint32_t j = 0; j < kNumBlockHorizon; j++) {
-			if ((i + j) % 2 == 0) {
-				continue;
-			}
-			worldTransformBlocks_[i][j] = new WorldTransform();
-			worldTransformBlocks_[i][j]->Initialize();
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[i][j]->translation_.y = kBlockheight * i;
-		}
-	}
+	//worldTransformBlocks_.resize(kNumBlockVirtical);
+
+	//for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
+
+	//	worldTransformBlocks_[i].resize(kNumBlockHorizon);
+	//}
+	//for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
+	//	for (uint32_t j = 0; j < kNumBlockHorizon; j++) {
+	//		if ((i + j) % 2 == 0) {
+	//			continue;
+	//		}
+	//		worldTransformBlocks_[i][j] = new WorldTransform();
+	//		worldTransformBlocks_[i][j]->Initialize();
+	//		worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
+	//		worldTransformBlocks_[i][j]->translation_.y = kBlockheight * i;
+	//	}
+	//}
 
 	camera_.Initialize();
 
 	// 自キャラにの生成
 	player_ = new Player();
 	// 自キャラの初期化
-	player_->Initialize(modelplayer_, &camera_);
+	player_->Initialize(modelPlayer_, textureHandle_, &camera_);
+ 
 	skydome_ = new Skydome();
-	skydome_->Initialize(modelskydome_, &camera_);
+	skydome_->Initialize(modelSkydome_, &camera_);
+
+	mapChipField_ = new MapChipField();
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+
+	GenerateBlocks();
+
 }
+
+
 
 // 更新処理
 void GameScene::Update() {
@@ -106,7 +119,7 @@ void GameScene::Draw() {
 			if (!worldTransformBlock) {
 				continue;
 			}
-			model_->Draw(*worldTransformBlock, camera_);
+			modelBlock_->Draw(*worldTransformBlock, camera_);
 		}
 	}
 	// 自キャラの描画
@@ -115,4 +128,34 @@ void GameScene::Draw() {
 
 	// スプライト描画後処理
 	Model::PostDraw();
+}
+
+
+
+void GameScene::GenerateBlocks() {
+	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
+
+	uint32_t numBlockHorizon = mapChipField_->GetNumBlockHorizontal();
+
+	worldTransformBlocks_.resize(numBlockVirtical);
+
+	for (uint32_t i = 0; i < numBlockVirtical; i++) {
+
+		worldTransformBlocks_[i].resize(numBlockHorizon);
+	}
+	for (uint32_t i = 0; i < numBlockVirtical; i++) {
+		for (uint32_t j = 0; j < numBlockHorizon; j++) {
+			//if ((i + j) % 2 == 0) {
+			//	continue;
+			//}
+
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransform->Initialize();
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionBiIndex(j, i);
+			}
+			
+		}
+	}
 }
