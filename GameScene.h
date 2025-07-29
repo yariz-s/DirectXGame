@@ -15,12 +15,9 @@ public:
 	MapChipField* mapChipField_ = nullptr;
 	void GenerateBlocks();
 
-	// デストラクタの宣言
-	~GameScene();
-
 private:
 	uint32_t textureHandle_ = 0;
-	KamataEngine::Model* modelPlayer_ = nullptr;
+	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Model* modelBlock_ = nullptr;
 	KamataEngine::Camera camera_;
 	Player* player_ = nullptr;

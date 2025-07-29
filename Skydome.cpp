@@ -1,14 +1,17 @@
 #include "Skydome.h"
-#include "cassert"
 
-void Skydome::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera) {
+void Skydome::Intialize(KamataEngine::Model* model, uint32_t modelSkydome, KamataEngine::Camera* camera) {
 	assert(model);
 	model_ = model;
-	worldTransform_.Initialize();
+	modelSkydome_ = modelSkydome;
 	camera_ = camera;
+	worldTransform_.Initialize();
 }
 
-void Skydome::Update() { worldTransform_.TransferMatrix(); }
+void Skydome::Update() {}
 
-void Skydome::Draw() { model_->Draw(worldTransform_, *camera_); }
-
+void Skydome::Draw() {
+	if (camera_ && model_) {
+		model_->Draw(worldTransform_, *camera_);
+	}
+}
