@@ -5,6 +5,7 @@
 #include <numbers>
 
 
+
 using namespace KamataEngine;
 using namespace MathUtility;
 
@@ -38,7 +39,7 @@ void Player::Update() {
 				// 向きが右でないとき、向きを変える
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
-					sumEulerRotation_,Y = worldTransform_.rotation_.y;
+					turnFirstRotationY_ = worldTransform_.rotation_.y;
 					turnTimer_ = kTimeTurn;
 				}
 
@@ -52,7 +53,7 @@ void Player::Update() {
 				// 向きが左でないとき、向きを変える
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
-					sumEulerRotation_,Y = worldTransform_.rotation_.y;
+					turnFirstRotationY_ = worldTransform_.rotation_.y;
 					turnTimer_ = kTimeTurn;
 				}
 			}
@@ -105,7 +106,7 @@ void Player::Update() {
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 
 		// 自キャラの角度を設定する（イージングを使って滑らかに）
-		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTurnTime);
+		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
 	}
 
 
