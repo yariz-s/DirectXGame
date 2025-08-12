@@ -1,17 +1,16 @@
-#include "Skydome.h"
+#pragma once
+#include "KamataEngine.h"
+#include "Player.h"
 
-void Skydome::Intialize(KamataEngine::Model* model, uint32_t modelSkydome, KamataEngine::Camera* camera) {
-	assert(model);
-	model_ = model;
-	modelSkydome_ = modelSkydome;
-	camera_ = camera;
-	worldTransform_.Initialize();
-}
+class Skydome {
+public:
+	void Intialize(KamataEngine::Model* model, uint32_t modelSkydome, KamataEngine::Camera* camera);
+	void Update();
+	void Draw();
 
-void Skydome::Update() {}
-
-void Skydome::Draw() {
-	if (camera_ && model_) {
-		model_->Draw(worldTransform_, *camera_);
-	}
-}
+private:
+	KamataEngine::WorldTransform worldTransform_;
+	KamataEngine::Model* model_ = nullptr;
+	uint32_t modelSkydome_ = 0u;
+	KamataEngine::Camera* camera_ = nullptr;
+};
