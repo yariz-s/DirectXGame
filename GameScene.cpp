@@ -15,7 +15,7 @@ void GameScene::Initialize() {
 	camera_.Initialize();
 
 	skydome_ = new Skydome();
-	skydome_->Intialize(modelSkydome_, textureHandle_, &camera_);
+	skydome_->Initialize(modelSkydome_, &camera_);
 	player_ = new Player();
 
 	debugCamera_ = new DebugCamera(1280, 720);

@@ -4,7 +4,7 @@
 
 class Skydome {
 public:
-	void Intialize(KamataEngine::Model* model, uint32_t modelSkydome, KamataEngine::Camera* camera);
+	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera );
 	void Update();
 	void Draw();
 
