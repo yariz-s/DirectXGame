@@ -2,6 +2,7 @@
 #include "KamataEngine.h"
 #include "vector"
 
+class MapChipField;
 class Player {
 public:
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
@@ -10,8 +11,13 @@ public:
 
 	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
+	void SetMapField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
 private:
+	static inline const float kWidth = 0.8f;
+	static inline const float kHeight = 0.8f;
+
+	MapChipField* mapChipField_ = nullptr;
 	KamataEngine::WorldTransform worldTransform_;
 	KamataEngine::Model* model_ = nullptr;
 	/*uint32_t textureHandle_ = 0u;*/
@@ -25,6 +31,7 @@ private:
 	enum class LRDirection {
 		kRight,
 		kLeft,
+
 	};
 
 	LRDirection lrDirection_ = LRDirection::kRight;
@@ -39,4 +46,33 @@ private:
 	static inline const float kGravityAcceleration = 0.1f;
 	static inline const float kLimitFallSpeed = 1.0f;
 	static inline const float kJumpAcceleration = 1.0f;
+
+	struct CollisionMapInfo {
+		bool iceiling = false;
+		bool landing = false;
+		bool hitWall = false;
+		KamataEngine::Vector3 move;
+	};
+//1
+	void InputMove();
+	//2
+	void CheckMapCollision(CollisionMapInfo& info);
+	void CheckMapCollisionUp(CollisionMapInfo& info);
+	//3
+	void CheckMapMove(const CollisionMapInfo& info);
+	void AnimateTurn();
+
+	//角
+	enum Corner {
+		
+		kRightBottom,
+		kLeftBottom,
+		kRightTop,
+		kLeftTop,
+
+		kNumCorner
+	};
+	
+
+	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center,Corner corner);
 };

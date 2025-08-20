@@ -17,6 +17,7 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 	player_ = new Player();
+	
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	mapChipField_ = new MapChipField;
@@ -26,6 +27,7 @@ void GameScene::Initialize() {
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionBiIndex(1, 18);
 	// playerPosition = {0, 0, 0};
 	player_->Initialize(model_, &camera_, playerPosition);
+	player_->SetMapField(mapChipField_);
 
 	// カメラコントローラーの初期化
 	cameraController_ = new CameraController();
