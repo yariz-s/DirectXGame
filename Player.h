@@ -54,11 +54,13 @@ private:
 		bool hitWall = false;
 		KamataEngine::Vector3 move;
 	};
-//1
+    //1
 	void InputMove();
 	//2
 	void CheckMapCollision(CollisionMapInfo& info);
 	void CheckMapCollisionUp(CollisionMapInfo& info);
+	void CheckMapCollisionDown(CollisionMapInfo& info);
+
 	//3
 	void CheckMapMove(const CollisionMapInfo& info);
 	
@@ -68,6 +70,8 @@ private:
 	//4
 	void CheckMapCeiling(const CollisionMapInfo& info);
 
+	//6接触状態の切り替え
+	void CheckMapLanding(const CollisionMapInfo& info);
 	//角
 	enum Corner {
 		
@@ -83,4 +87,7 @@ private:
 	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center,Corner corner);
 
 	static inline const float kBlank = 0.1f;
+	static inline const float kAttenuationLanding = 0.1f;
+	static inline const float kGroundSearchHeight = 0.1f;
+	static inline const float kAttenuationWall = 0.1f;
 };
