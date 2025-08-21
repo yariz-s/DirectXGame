@@ -175,7 +175,7 @@ void Player::AnimateTurn() {
 		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 		//自キャラの角度設定
-		worldTransform_.rotation_.y = (destinationRotationY; turnFirstRotationY_, turnTimer_ / kTimeTurn);
+		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
 
 	}
 }

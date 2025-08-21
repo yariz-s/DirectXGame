@@ -24,7 +24,7 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	GenerateBlocks();
 
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionBiIndex(1, 18);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	// playerPosition = {0, 0, 0};
 	player_->Initialize(model_, &camera_, playerPosition);
 	player_->SetMapField(mapChipField_);
@@ -102,7 +102,7 @@ void GameScene::GenerateBlocks() {
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
 				worldTransformBlocks_[i][j] = worldTransform;
-				worldTransform->translation_ = mapChipField_->GetMapChipPositionBiIndex(j, i);
+				worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
 		}
 	}

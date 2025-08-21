@@ -1,6 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "vector"
+#include "MapChipField.h"
 
 class MapChipField;
 class Player {
@@ -48,7 +49,7 @@ private:
 	static inline const float kJumpAcceleration = 1.0f;
 
 	struct CollisionMapInfo {
-		bool iceiling = false;
+		bool ceiling = false;
 		bool landing = false;
 		bool hitWall = false;
 		KamataEngine::Vector3 move;
@@ -60,7 +61,12 @@ private:
 	void CheckMapCollisionUp(CollisionMapInfo& info);
 	//3
 	void CheckMapMove(const CollisionMapInfo& info);
+	
+	
 	void AnimateTurn();
+
+	//4
+	void CheckMapCeiling(const CollisionMapInfo& info);
 
 	//角
 	enum Corner {
@@ -75,4 +81,6 @@ private:
 	
 
 	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center,Corner corner);
+
+	static inline const float kBlank = 0.1f;
 };
