@@ -60,7 +60,8 @@ private:
 	void CheckMapCollision(CollisionMapInfo& info);
 	void CheckMapCollisionUp(CollisionMapInfo& info);
 	void CheckMapCollisionDown(CollisionMapInfo& info);
-
+	void CheckMapCollisionRight(CollisionMapInfo& info);
+	void CheckMapCollisionLeft(CollisionMapInfo& info);
 	//3
 	void CheckMapMove(const CollisionMapInfo& info);
 	
@@ -69,7 +70,8 @@ private:
 
 	//4
 	void CheckMapCeiling(const CollisionMapInfo& info);
-
+	//5
+	void CheckMapWall(const CollisionMapInfo& info);
 	//6接触状態の切り替え
 	void CheckMapLanding(const CollisionMapInfo& info);
 	//角
