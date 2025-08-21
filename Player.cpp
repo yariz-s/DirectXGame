@@ -25,11 +25,28 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 
 void Player::Update() {
 	InputMove();
-	
-	CollisionMapInfo collisionMapInfo;
 
-	// 移動処理
-	worldTransform_.translation_ += velocity_;
+	//2移動量をかみして衝突判定
+	
+	//衝突情報を初期化
+	CollisionMapInfo collisionMapInfo;	
+
+	///移動量の速度値コピー
+	collisionMapInfo.move = velocity_;	
+
+	// 衝突判定
+	CheckMapCollision(collisionMapInfo);
+
+	//３判定結果反映
+	//移動
+	CheckMapMove(collisionMapInfo);
+
+	//４
+	CheckMapCeiling(collisionMapInfo);
+	//5
+
+	//6
+
 
 
 
