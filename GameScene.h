@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Skydome.h"
 #include <vector>
+#include "Enemy.h"
 
 class GameScene {
 public:
@@ -19,9 +20,11 @@ public:
 private:
 	uint32_t textureHandle_ = 0;
 	KamataEngine::Model* model_ = nullptr;
+	KamataEngine::Model* modelEnemy_ = nullptr;
 	KamataEngine::Model* modelBlock_ = nullptr;
 	KamataEngine::Camera camera_;
 	Player* player_ = nullptr;
+	Enemy* enemy_ = nullptr;
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 	Skydome* skydome_ = nullptr;

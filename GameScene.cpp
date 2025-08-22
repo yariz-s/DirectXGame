@@ -12,12 +12,13 @@ void GameScene::Initialize() {
 	model_ = Model::CreateFromOBJ("player");
 	modelBlock_ = Model::CreateFromOBJ("block");
 	modelSkydome_ = Model::CreateFromOBJ("SkyDome", true);
+	modelEnemy_ = Model::CreateFromOBJ("Enemy", true);
 	camera_.Initialize();
 
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 	player_ = new Player();
-	
+	enemy_ = new Enemy();
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	mapChipField_ = new MapChipField;
@@ -29,6 +30,9 @@ void GameScene::Initialize() {
 	player_->Initialize(model_, &camera_, playerPosition);
 	player_->SetMapField(mapChipField_);
 
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10, 18);
+	enemy_->Initialize(modelEnemy_, &camera_, enemyPosition);
+
 	// カメラコントローラーの初期化
 	cameraController_ = new CameraController();
 	cameraController_->Initialize();
@@ -39,8 +43,10 @@ void GameScene::Initialize() {
 	cameraController_->SetMovableArea(cameraArea);
 }
 
+//アップデート
 void GameScene::Update() {
 	player_->Update();
+	enemy_->Update();
 
 	for (uint32_t x = 0; x < worldTransformBlocks_.size(); ++x) {
 		for (uint32_t y = 0; y < worldTransformBlocks_[x].size(); ++y) {
@@ -83,9 +89,10 @@ void GameScene::Draw() {
 				modelBlock_->Draw(*worldTransformBlocks_[x][y], camera_);
 			}
 		}
-	}
+	};
 	skydome_->Draw();
 	player_->Draw();
+	enemy_->Draw();
 	Model::PostDraw();
 }
 

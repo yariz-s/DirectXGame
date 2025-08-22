@@ -32,7 +32,6 @@ private:
 	enum class LRDirection {
 		kRight,
 		kLeft,
-
 	};
 
 	LRDirection lrDirection_ = LRDirection::kRight;
