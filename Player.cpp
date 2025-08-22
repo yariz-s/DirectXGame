@@ -1,6 +1,5 @@
 #define NOMINMAX
 #include "Player.h"
-#include "MyMath.h"
 #include <algorithm>
 #include <numbers>
 
@@ -63,6 +62,27 @@ void Player::Draw() {
 	if (camera_ && model_) {
 		model_->Draw(worldTransform_, *camera_);
 	}
+}
+
+KamataEngine::Vector3 Player::GetWorldPosition() 
+	{
+	Vector3 worldPos;
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+	return worldPos;
+}
+
+AABB Player::GetAABB() { 
+	Vector3 worldPos = GetWorldPosition();
+	AABB aabb;
+	aabb.min = {worldPos.x - kWidth / 2.0f, worldPos.y - kHeight / 2.0f, worldPos.z - kWidth / 2.0f};
+	aabb.max = {worldPos.x + kWidth / 2.0f, worldPos.y + kHeight / 2.0f, worldPos.z + kWidth / 2.0f};
+	return aabb;
+}
+
+void Player::OnCollision(const Enemy* enemy) { (void)enemy;
+	velocity_ += Vector3(0,1,0); // 衝突時に少し上に押し上げる
 }
 
 void Player::InputMove() {

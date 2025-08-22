@@ -1,12 +1,18 @@
 #pragma once
 #include "KamataEngine.h"
+#include "MyMath.h"
+class Player;
 
 class Enemy {
 public:
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
 	void Update();
 	void Draw();
-
+	KamataEngine::Vector3 GetWorldPosition();
+	// AABBを取得
+	AABB GetAABB();
+	//衝突応答
+	void OnCollision(const Player* player);
 
 private:
 	KamataEngine::WorldTransform worldTransform_;

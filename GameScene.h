@@ -16,6 +16,8 @@ public:
 	KamataEngine::Model* modelSkydome_ = nullptr;
 	MapChipField* mapChipField_ = nullptr;
 	void GenerateBlocks();
+	//全ての当たり判定
+	void CheckMapCollision();
 
 private:
 	uint32_t textureHandle_ = 0;
@@ -24,7 +26,8 @@ private:
 	KamataEngine::Model* modelBlock_ = nullptr;
 	KamataEngine::Camera camera_;
 	Player* player_ = nullptr;
-	Enemy* enemy_ = nullptr;
+	
+	std::list<Enemy*> enemies_;
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 	Skydome* skydome_ = nullptr;

@@ -18,7 +18,7 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 	player_ = new Player();
-	enemy_ = new Enemy();
+
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	mapChipField_ = new MapChipField;
@@ -29,9 +29,12 @@ void GameScene::Initialize() {
 	// playerPosition = {0, 0, 0};
 	player_->Initialize(model_, &camera_, playerPosition);
 	player_->SetMapField(mapChipField_);
-
-	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10, 18);
-	enemy_->Initialize(modelEnemy_, &camera_, enemyPosition);
+	for (int32_t i = 0; i < 10; ++i){
+		Enemy* newEnemy = new Enemy();
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(6+i,18);
+		newEnemy->Initialize(modelEnemy_, &camera_, enemyPosition);
+		enemies_.push_back(newEnemy);
+	}
 
 	// カメラコントローラーの初期化
 	cameraController_ = new CameraController();
@@ -46,7 +49,10 @@ void GameScene::Initialize() {
 //アップデート
 void GameScene::Update() {
 	player_->Update();
-	enemy_->Update();
+
+	for (Enemy* enemy : enemies_) {
+		enemy->Update();
+	}
 
 	for (uint32_t x = 0; x < worldTransformBlocks_.size(); ++x) {
 		for (uint32_t y = 0; y < worldTransformBlocks_[x].size(); ++y) {
@@ -58,6 +64,10 @@ void GameScene::Update() {
 			worldTransformBlock->TransferMatrix();
 		}
 	}
+
+//全ての当たり判定
+	CheckMapCollision();
+
 
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_0)) {
@@ -92,7 +102,9 @@ void GameScene::Draw() {
 	};
 	skydome_->Draw();
 	player_->Draw();
-	enemy_->Draw();
+	for (Enemy* enemy : enemies_) {
+		enemy->Draw();
+	}
 	Model::PostDraw();
 }
 
@@ -111,6 +123,18 @@ void GameScene::GenerateBlocks() {
 				worldTransformBlocks_[i][j] = worldTransform;
 				worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
+		}
+	}
+}
+
+void GameScene::CheckMapCollision() { 
+	AABB aabb1, aabb2;
+	aabb1 = player_->GetAABB();
+	for (Enemy* enemy : enemies_) {
+		aabb2 = enemy->GetAABB();
+		if (IsCollision (aabb1,aabb2)) {
+			player_->OnCollision(enemy);
+			enemy->OnCollision(player_);
 		}
 	}
 }
