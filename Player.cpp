@@ -1,10 +1,11 @@
+#define NOMINMAX
 #include "player.h"
 #include "cassert"
 #include "numbers"
-#define NOMINMAX
 #include "MapChipField.h"
 #include "algorithm"
 
+using namespace std;
 using namespace KamataEngine;
 
 using namespace MathUtility;

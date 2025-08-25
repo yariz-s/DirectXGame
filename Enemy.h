@@ -1,8 +1,5 @@
 #pragma once
 #include "KamataEngine.h"
-#include "MyMath.h"
-#pragma once
-#include "KamataEngine.h"
 
 class Player;
 

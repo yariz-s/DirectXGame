@@ -1,6 +1,7 @@
+#pragma once
 #include "KamataEngine.h"
 
-#pragma once
+
 class Skydome {
 
 public:
