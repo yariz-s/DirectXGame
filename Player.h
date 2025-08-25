@@ -1,58 +1,79 @@
 #pragma once
 #include "KamataEngine.h"
-#include "vector"
-#include "MapChipField.h"
 #include "MyMath.h"
 
 class MapChipField;
-class Enemy; 
+
+class Enemy;
+
 class Player {
 public:
-	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
-	void Update();
-	void Draw();
-
-	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
-	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
-	void SetMapField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
-
-	KamataEngine::Vector3 GetWorldPosition();
-	//AABBを取得
-	AABB GetAABB();
-	void OnCollision(const Enemy* enemy);
-
-private:
-	static inline const float kWidth = 0.8f;
-	static inline const float kHeight = 0.8f;
-
-	MapChipField* mapChipField_ = nullptr;
-	KamataEngine::WorldTransform worldTransform_;
-	KamataEngine::Model* model_ = nullptr;
-	/*uint32_t textureHandle_ = 0u;*/
-	KamataEngine::Camera* camera_ = nullptr;
-
-	KamataEngine::Vector3 velocity_{};
-	static inline const float kAcceleration = 0.1f;
-	static inline const float kAttenuation = 0.1f;
-	static inline const float kLimitRunSpeed = 2.0f;
-
+	// 左右
 	enum class LRDirection {
 		kRight,
 		kLeft,
 	};
 
+	/*void Initialize(KamataEngine::Model* model,uint32_t textureHandle,KamataEngine::Camera* camera);*/
+	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
+
+	void Update();
+
+	void Draw();
+
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
+
+	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
+
+	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
+
+	AABB GetAABB();
+
+	KamataEngine::Vector3 GetWorldPosition();
+
+	void OnCollision(const Enemy* enemy);
+
+	// デスフラグのgetter
+	bool IsDead() const { return isDead_; }
+
+private:
+	// スプライト
+	KamataEngine::Model* model_ = nullptr;
+
+	KamataEngine::Camera* camera_ = nullptr;
+
+	// マップチップによるフィールド
+	MapChipField* mapChipField_ = nullptr;
+
+	KamataEngine::Vector3 velocity_ = {};
+
+	KamataEngine::WorldTransform worldTransform_;
+
+	static inline const float kAcceleration = 0.1f;
+
+	static inline const float kAttenuation = 0.1f;
+
+	static inline const float kLimitRunSpeed = 1.0f;
+
 	LRDirection lrDirection_ = LRDirection::kRight;
 
 	float turnFirstRotationY_ = 0.0f;
+
 	float turnTimer_ = 0.0f;
 
-	static inline const float kTimeTurn = 0.5f;
+	static inline const float kTimeTurn = 0.3f;
 
 	bool onGround_ = true;
 
 	static inline const float kGravityAcceleration = 0.1f;
+
 	static inline const float kLimitFallSpeed = 1.0f;
+
 	static inline const float kJumpAcceleration = 1.0f;
+
+	// キャラクターの当たり判定サイズ
+	static inline const float kWidth = 0.8f;
+	static inline const float kHeight = 0.8f;
 
 	struct CollisionMapInfo {
 		bool ceiling = false;
@@ -60,29 +81,31 @@ private:
 		bool hitWall = false;
 		KamataEngine::Vector3 move;
 	};
-    //1
+
 	void InputMove();
-	//2
+
 	void CheckMapCollision(CollisionMapInfo& info);
+	// 衝突判定　上
 	void CheckMapCollisionUp(CollisionMapInfo& info);
+	// 衝突判定　下
 	void CheckMapCollisionDown(CollisionMapInfo& info);
+	// 衝突判定　右
 	void CheckMapCollisionRight(CollisionMapInfo& info);
+	// 衝突判定　左
 	void CheckMapCollisionLeft(CollisionMapInfo& info);
-	//3
+
 	void CheckMapMove(const CollisionMapInfo& info);
-	
-	
+
+	void CheckMapCeiling(const CollisionMapInfo& info);
+
+	void CheckMapLanding(const CollisionMapInfo& info);
+
+	void CheckMapWall(const CollisionMapInfo& info);
+
 	void AnimateTurn();
 
-	//4
-	void CheckMapCeiling(const CollisionMapInfo& info);
-	//5
-	void CheckMapWall(const CollisionMapInfo& info);
-	//6接触状態の切り替え
-	void CheckMapLanding(const CollisionMapInfo& info);
-	//角
+	// 角
 	enum Corner {
-		
 		kRightBottom,
 		kLeftBottom,
 		kRightTop,
@@ -90,12 +113,16 @@ private:
 
 		kNumCorner
 	};
-	
 
-	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center,Corner corner);
+	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center, Corner corner);
 
 	static inline const float kBlank = 0.1f;
-	static inline const float kAttenuationLanding = 0.1f;
-	static inline const float kGroundSearchHeight = 0.1f;
-	static inline const float kAttenuationWall = 0.1f;
+
+	static inline const float kAttenuationLanding = 0.5f;
+
+	static inline const float kGroundSearchHeight = 0.5f;
+
+	static inline const float kAttenuationWall = 0.5f;
+	// デスフラグ
+	bool isDead_ = false;
 };

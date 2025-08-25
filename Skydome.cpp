@@ -1,31 +1,13 @@
-#include "Skydome.h"
+#include "skydome.h"
 
-using namespace KamataEngine;
-
-// 初期化
-void Skydome::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera)
-{
-	// NULLポインタチェック
+void Skydome::Initialize(KamataEngine::Model* model, uint32_t textureHandle, KamataEngine::Camera* camera) {
 	assert(model);
-
-	// 引数として受け取ったデータをメンバ変数に記録する
 	model_ = model;
-
-	// 引数の内容をメンバ変数に記録
-	camera_ = camera;
-
-	// ワールド変換の初期化
+	textureHandle_ = textureHandle;
 	worldTransform_.Initialize();
+	camera_ = camera;
 }
 
-// 更新
-void Skydome::Update() {
-	// 行列を定数バッファに転送
-	worldTransform_.TransferMatrix();
-}
+void Skydome::Update() {}
 
-// 描画
-void Skydome::Draw() {
-	// 3Dモデルを描画
-	model_->Draw(worldTransform_, *camera_);
-}
+void Skydome::Draw() { model_->Draw(worldTransform_, *camera_); }

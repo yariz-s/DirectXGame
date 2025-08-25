@@ -1,122 +1,209 @@
 #include "GameScene.h"
-#include "CameraController.h"
-#include "MapChipField.h"
 #include "MyMath.h"
-#include "Player.h"
-#include "Skydome.h"
+#include "player.h"
 
 using namespace KamataEngine;
 
+// デストラクタ(解放)
+GameScene::~GameScene() {
+	delete model_;
+	delete player_;
+	delete modelEnemy_;
+	delete modelSkydome_;
+	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockline : worldTransformBlocks_) {
+		for (KamataEngine::WorldTransform* worldTransformBlock : worldTransformBlockline) {
+			delete worldTransformBlock;
+		}
+	}
+	worldTransformBlocks_.clear();
+	delete debugCamera_;
+	delete deathParticles_;
+	delete mapChipField_;
+	for (Enemy* enemy : enemies_) {
+		delete enemy;
+	}
+}
+
+// 初期化処理
 void GameScene::Initialize() {
-	textureHandle_ = TextureManager::Load("uvChecker.png");
-	model_ = Model::CreateFromOBJ("player");
-	modelBlock_ = Model::CreateFromOBJ("block");
-	modelSkydome_ = Model::CreateFromOBJ("SkyDome", true);
-	modelEnemy_ = Model::CreateFromOBJ("Enemy", true);
-	camera_.Initialize();
-
-	skydome_ = new Skydome();
-	skydome_->Initialize(modelSkydome_, &camera_);
-	player_ = new Player();
-
-
-	debugCamera_ = new DebugCamera(1280, 720);
-	mapChipField_ = new MapChipField;
-	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
-	GenerateBlocks();
 
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
-	// playerPosition = {0, 0, 0};
-	player_->Initialize(model_, &camera_, playerPosition);
-	player_->SetMapField(mapChipField_);
-	for (int32_t i = 0; i < 10; ++i){
+
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(20, 18);
+	// ファイル名を指定してテクスチャを読み込む
+	textureHandle_ = TextureManager::Load("uvChecker.png");
+	// スプライトインスタンスの生成
+	model_ = Model::CreateFromOBJ("block", true);
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+
+	modelPlayer_ = Model::CreateFromOBJ("player", true);
+
+	modelParticles_ = Model::CreateFromOBJ("deathParticle", true);
+
+	debugCamera_ = new DebugCamera(1280, 720);
+
+	modelEnemy_ = Model::CreateFromOBJ("enemy", true);
+
+	/*deathParticles_ = new DeathParticles;
+	deathParticles_->Initialize(modelParticles_, &camera_, playerPosition);*/
+
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+	// ゲームプレイフェーズから開始
+	phase_ = Phase::kPlay;
+
+	GenerateBlocks();
+
+	// カメラの初期化
+	camera_.Initialize();
+
+	// 自キャラにの生成
+	player_ = new Player();
+
+	// 　敵キャラの生成
+	/*enemy_ = new Enemy();*/
+	for (int32_t i = 0; i < 2; i++) {
 		Enemy* newEnemy = new Enemy();
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(6+i,18);
+		enemyPosition = mapChipField_->GetMapChipPositionByIndex(20 + i, 18);
 		newEnemy->Initialize(modelEnemy_, &camera_, enemyPosition);
+
 		enemies_.push_back(newEnemy);
 	}
 
-	// カメラコントローラーの初期化
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+	GenerateBlocks();
+	player_->SetMapChipField(mapChipField_);
+
+	skydome_ = new Skydome();
+
 	cameraController_ = new CameraController();
+
+	// 自キャラの初期化
+	player_->Initialize(modelPlayer_, &camera_, playerPosition);
+
+	// 敵キャラの初期化
+	/*enemy_->Initialize(modelEnemy_,&camera_,enemyPosition);*/
+
+	// 背景
+	skydome_->Initialize(modelSkydome_, textureHandle_, &camera_);
+
 	cameraController_->Initialize();
+
 	cameraController_->SetTarget(player_);
+
 	cameraController_->Reset();
 
 	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
 	cameraController_->SetMovableArea(cameraArea);
 }
 
-//アップデート
+// 更新処理
 void GameScene::Update() {
+	// 自キャラの更新
 	player_->Update();
 
-	for (Enemy* enemy : enemies_) {
-		enemy->Update();
-	}
+	/*enemy_->Update();*/
 
-	for (uint32_t x = 0; x < worldTransformBlocks_.size(); ++x) {
-		for (uint32_t y = 0; y < worldTransformBlocks_[x].size(); ++y) {
-			WorldTransform* worldTransformBlock = worldTransformBlocks_[x][y];
-			if (!worldTransformBlock)
+	// すべての当たり判定を行う
+	CheckAllCollisions();
+
+	ChangePhase();
+
+	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (KamataEngine::WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			if (!worldTransformBlock) {
 				continue;
+			}
+			worldTransformBlock->matWorld_ = MakeaffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
 
-			worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
 			worldTransformBlock->TransferMatrix();
 		}
 	}
-
-//全ての当たり判定
-	CheckMapCollision();
-
-
+	debugCamera_->Update();
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_0)) {
 		isDebugCameraActive_ = !isDebugCameraActive_;
 	}
 #endif
-
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
 		camera_.matView = debugCamera_->GetCamera().matView;
-		camera_.matProjection = debugCamera_->GetCamera().matProjection;
 		camera_.TransferMatrix();
 	} else {
-		camera_.UpdateMatrix();
+		///*camera_.UpdateMatrix();*/
 		camera_.matView = cameraController_->GetViewProjection().matView;
 		camera_.matProjection = cameraController_->GetViewProjection().matProjection;
+		//
 		camera_.TransferMatrix();
 	}
-
 	cameraController_->Update();
+
+	for (Enemy* enemy : enemies_) {
+		enemy->Update();
+	}
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
+	if (deathParticles_ && deathParticles_->IsFinished()) {
+		finished_ = true;
+	}
 }
 
+// 描画処理
 void GameScene::Draw() {
+	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+
+	// スプライト描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
-	for (uint32_t x = 0; x < worldTransformBlocks_.size(); ++x) {
-		for (uint32_t y = 0; y < worldTransformBlocks_[x].size(); ++y) {
-			if (worldTransformBlocks_[x][y]) {
-				modelBlock_->Draw(*worldTransformBlocks_[x][y], camera_);
+
+	// ここに描画処理
+
+	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockline : worldTransformBlocks_) {
+		for (KamataEngine::WorldTransform* worldTransformBlock : worldTransformBlockline) {
+			if (!worldTransformBlock) {
+				continue;
 			}
+			model_->Draw(*worldTransformBlock, camera_);
 		}
-	};
+	}
+	// プレイヤーの表示kPlayの時表示
+	if (phase_ == Phase::kPlay) {
+		// 自キャラの描画
+		player_->Draw();
+	}
+	// 背景の描画
 	skydome_->Draw();
-	player_->Draw();
+	// 敵の描画
+	/*enemy_->Draw();*/
+
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
+	if (deathParticles_) {
+		deathParticles_->Draw();
+	}
+
+	// スプライト描画後処理
 	Model::PostDraw();
 }
 
 void GameScene::GenerateBlocks() {
-	uint32_t kNumBlockVertical = mapChipField_->GetNumBlockVirtical();
-	uint32_t kNumBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
-	worldTransformBlocks_.resize(kNumBlockVertical);
-	for (uint32_t i = 0; i < kNumBlockVertical; ++i) {
-		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
+	const uint32_t kNumBlockVirtical = mapChipField_->GetNumBlockVerirtical();
+	const uint32_t kNumBlockHorizon = mapChipField_->GetNumBlockHorizontal();
+
+	// const float kBlockWidth = 2.0f;
+	// const float kBlockheight = 2.0f;
+
+	worldTransformBlocks_.resize(kNumBlockVirtical);
+
+	for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
+
+		worldTransformBlocks_[i].resize(kNumBlockHorizon);
 	}
-	for (uint32_t i = 0; i < kNumBlockVertical; ++i) {
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
+	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
+		for (uint32_t j = 0; j < kNumBlockHorizon; ++j) {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
@@ -127,14 +214,47 @@ void GameScene::GenerateBlocks() {
 	}
 }
 
-void GameScene::CheckMapCollision() { 
+void GameScene::CheckAllCollisions() {
+	// 判定対象1と2の座標
 	AABB aabb1, aabb2;
+	// 自キャラの座標
 	aabb1 = player_->GetAABB();
+	// 自キャラと敵弾全ての当たり判定
 	for (Enemy* enemy : enemies_) {
+		// 敵弾の座標
 		aabb2 = enemy->GetAABB();
-		if (IsCollision (aabb1,aabb2)) {
+
+		// AABB同士の交差判定
+		if (IsCollision(aabb1, aabb2)) {
 			player_->OnCollision(enemy);
+
+			// ジャンプ開始(仮処理)
 			enemy->OnCollision(player_);
 		}
+	}
+}
+
+void GameScene::ChangePhase() {
+
+	switch (phase_) {
+	case GameScene::Phase::kPlay:
+		// ゲームプレイフェーズの処理
+		if (player_->IsDead()) {
+			// 死亡演出フェーズに切り替え
+			phase_ = Phase::kDeath;
+			// 自キャラの座標を取得
+			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+
+			deathParticles_ = new DeathParticles;
+			//
+			deathParticles_->Initialize(modelParticles_, &camera_, deathParticlesPosition);
+		}
+		break;
+	case GameScene::Phase::kDeath:
+		// デス演出フェーズの処理
+		if (deathParticles_ && deathParticles_->IsFinished()) {
+			finished_ = true;
+		}
+		break;
 	}
 }
