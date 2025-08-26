@@ -18,7 +18,7 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 }
 
-//更新
+//更新(Update)
 void Player::Update() {
 	// 1移動入力
 	InputMove();

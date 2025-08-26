@@ -27,7 +27,7 @@ Scene scene = Scene::kUnkown;
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// エンジンの初期化
-	KamataEngine::Initialize(L"GC2D_08_ヤリミズ_シオンAL3");
+	KamataEngine::Initialize(L"GC2D_08_ヤリミズ_シオン_AL3");
 
 	scene = Scene::kTitle;
 	title = new TitleScene2;
