@@ -1,11 +1,10 @@
-#define NOMINMAX
 #include "player.h"
 #include "cassert"
 #include "numbers"
+#define NOMINMAX
 #include "MapChipField.h"
 #include "algorithm"
 
-using namespace std;
 using namespace KamataEngine;
 
 using namespace MathUtility;
@@ -19,23 +18,25 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 }
 
+//更新
 void Player::Update() {
-	// 移動入力
+	// 1移動入力
 	InputMove();
-
 	// ２移動量を加味して衝突判定する
 	CollisionMapInfo collisionMapInfo;
-
+	//移動量に速度の値をコピー
 	collisionMapInfo.move = velocity_;
-
+	//マップ衝突チェック
 	CheckMapCollision(collisionMapInfo);
-
+	// 3判定結果を反映して移動
 	CheckMapMove(collisionMapInfo);
-
+	// 4天井に接触している場合の処理
 	CheckMapCeiling(collisionMapInfo);
-
+	// 5壁に接触している場合の処理
+	CheckMapWall(collisionMapInfo);
+	// 6床に接触している場合の処理
 	CheckMapLanding(collisionMapInfo);
-
+	// 7向きのアニメーション
 	AnimateTurn();
 
 	worldTransform_.matWorld_ = MakeaffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
